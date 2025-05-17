@@ -1,0 +1,51 @@
+{
+    "app": "backend-app",
+    "deployments": [
+        {
+            "name": "production",
+            "region": "us-west-1",
+            "resources": {
+                "cpu": 1,
+                "memory": 2,
+                "replicas": 2
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Production"
+            },
+            "secrets": [
+                "CONNECTION_STRING",
+                "JWT_SECRET"
+            ]
+        },
+        {
+            "name": "staging",
+            "region": "us-west-1", 
+            "resources": {
+                "cpu": 0.5,
+                "memory": 1,
+                "replicas": 1
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Staging"
+            },
+            "secrets": [
+                "STAGING_CONNECTION_STRING",
+                "STAGING_JWT_SECRET"
+            ]
+        }
+    ],
+    "database": {
+        "type": "mssql",
+        "version": "2022",
+        "backup": {
+            "schedule": "0 0 * * *", 
+            "retention": "30d"
+        }
+    },
+    "healthCheck": {
+        "path": "/health",
+        "interval": "30s",
+        "timeout": "5s",
+        "retries": 3
+    }
+}
