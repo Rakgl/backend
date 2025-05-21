@@ -28,14 +28,21 @@ public class UserController : ControllerBase
             {
                 conn.Open();
                 var sql = "INSERT INTO " +
-                          "BACKEND.dbo.users(first_name, last_name, email, username, password) " +
-                          "VALUES (@first_name, @last_name, @email, @username, @password)";
+                          "BACKEND.dbo.users(profile,first_name, last_name, email, employee, position, department, phone, hire_date, status, password) " +
+                          "VALUES (@profile,@first_name, @last_name, @email, @employee, @position, @department, @phone, @hire_date, @status, @password)";
                 using (SqlCommand cd = new SqlCommand(sql, conn))
                 {
+                    cd.Parameters.AddWithValue("@profile", request.profile);
                     cd.Parameters.AddWithValue("@first_name", request.first_name);
                     cd.Parameters.AddWithValue("@last_name", request.last_name);
                     cd.Parameters.AddWithValue("@email", request.email);
-                    cd.Parameters.AddWithValue("@username", request.username);
+                    cd.Parameters.AddWithValue("@employee", request.employee);
+                    cd.Parameters.AddWithValue("@position", request.position);
+                    cd.Parameters.AddWithValue("@department", request.department);
+                    cd.Parameters.AddWithValue("@phone", request.phone);
+                    cd.Parameters.AddWithValue("@hire_date", request.hire_date);
+                    cd.Parameters.AddWithValue("@status", request.status);
+                    
                     var helper = new GeneralHelper();
                     var hashedPassword = helper.HashPassword(request.password);
                     cd.Parameters.AddWithValue("@password", hashedPassword);
@@ -67,7 +74,7 @@ public class UserController : ControllerBase
             using (SqlConnection conn = new SqlConnection(conStr))
             {
                 conn.Open();
-                var sql = "SELECT id, first_name, last_name, email, username FROM BACKEND.dbo.users";
+                var sql = "SELECT id,profile, first_name, last_name, email, employee, position, department, phone, hire_date, status FROM BACKEND.dbo.users";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     using (SqlDataReader reader = cmd.ExecuteReader())
@@ -77,10 +84,16 @@ public class UserController : ControllerBase
                             users.Add(new UserEntity
                             {
                                 id = reader.GetInt32(reader.GetOrdinal("id")),
+                                profile = reader.GetString(reader.GetOrdinal("profile")),
                                 first_name = reader.GetString(reader.GetOrdinal("first_name")),
                                 last_name = reader.GetString(reader.GetOrdinal("last_name")),
                                 email = reader.GetString(reader.GetOrdinal("email")),
-                                username = reader.GetString(reader.GetOrdinal("username"))
+                                employee = reader.GetString(reader.GetOrdinal("employee")),
+                                position = reader.GetString(reader.GetOrdinal("position")),
+                                department = reader.GetString(reader.GetOrdinal("department")),
+                                phone = reader.GetString(reader.GetOrdinal("phone")),
+                                hire_date = reader.GetDateTime(reader.GetOrdinal("hire_date")),
+                                status = reader.GetString(reader.GetOrdinal("status"))
                             });
                         }
                     }
@@ -93,6 +106,53 @@ public class UserController : ControllerBase
             return StatusCode(500, $"Error retrieving users: {ex.Message}");
         }
     }
+    
+    //------------------------------Get user by Id
+    [Authorize]
+        [HttpGet("{id}")]
+        public IActionResult GetUserById(int id)
+        {
+            try
+            {
+                var conStr = _configuration.GetConnectionString("Default");
+                using (SqlConnection conn = new SqlConnection(conStr))
+                {
+                    conn.Open();
+                    var sql = "SELECT id, profile, first_name, last_name, email, employee, position, department, phone, hire_date, status FROM BACKEND.dbo.users WHERE id = @id";
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@id", id);
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (!reader.Read())
+                            {
+                                return NotFound("User not found");
+                            }
+
+                            var user = new UserEntity
+                            {
+                                id = reader.GetInt32(reader.GetOrdinal("id")),
+                                profile = reader.GetString(reader.GetOrdinal("profile")),
+                                first_name = reader.GetString(reader.GetOrdinal("first_name")),
+                                last_name = reader.GetString(reader.GetOrdinal("last_name")),
+                                email = reader.GetString(reader.GetOrdinal("email")),
+                                employee = reader.GetString(reader.GetOrdinal("employee")),
+                                position = reader.GetString(reader.GetOrdinal("position")),
+                                department = reader.GetString(reader.GetOrdinal("department")),
+                                phone = reader.GetString(reader.GetOrdinal("phone")),
+                                hire_date = reader.GetDateTime(reader.GetOrdinal("hire_date")),
+                                status = reader.GetString(reader.GetOrdinal("status"))
+                            };
+                            return Ok(user);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error retrieving user: {ex.Message}");
+            }
+        }
 
     //------------------------------update
     [Authorize]
@@ -109,16 +169,22 @@ public class UserController : ControllerBase
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                var sql = "UPDATE BACKEND.dbo.users SET first_name=@first_name,  last_name=@last_name,   email=@email,  password=@password, username=@username WHERE id=@id;";
+                var sql = "UPDATE BACKEND.dbo.users SET first_name=@profile,@first_name,  last_name=@last_name,   email=@email,  password=@password, employee=@employee, position=@position, department=@department, phone=@phone, hire_date=@hire_date, status=@status WHERE id=@id;";
                 SqlCommand cd = new SqlCommand(sql, connection);
+                cd.Parameters.AddWithValue("@id", request.id);
+                cd.Parameters.AddWithValue("@profile", request.profile);
                 cd.Parameters.AddWithValue("@first_name", request.first_name);
                 cd.Parameters.AddWithValue("@last_name", request.last_name);
                 cd.Parameters.AddWithValue("@email", request.email);
-                cd.Parameters.AddWithValue("@username", request.username);
+                cd.Parameters.AddWithValue("@employee", request.employee);
+                cd.Parameters.AddWithValue("@position", request.position);
+                cd.Parameters.AddWithValue("@department", request.department);
+                cd.Parameters.AddWithValue("@phone", request.phone);
+                cd.Parameters.AddWithValue("@hire_date", request.hire_date);
+                cd.Parameters.AddWithValue("@status", request.status);
                 var helper = new GeneralHelper();
                 var hashedPassword = helper.HashPassword(request.password);
                 cd.Parameters.AddWithValue("@password", hashedPassword);
-                cd.Parameters.AddWithValue("@id", request.id);
                 
                 var rowaffected = cd.ExecuteNonQuery();
                 if (rowaffected > 0)

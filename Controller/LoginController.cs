@@ -26,19 +26,19 @@ public class LoginController : ControllerBase
     {
         try
         {
-            if (request == null || string.IsNullOrEmpty(request.username) || string.IsNullOrEmpty(request.password))
+            if (request == null || string.IsNullOrEmpty(request.email) || string.IsNullOrEmpty(request.password))
             {
-                return BadRequest("Username and password are required");
+                return BadRequest("Enail and password are required");
             }
 
             var conStr = _configuration.GetConnectionString(name: "Default");
             using (SqlConnection conn = new SqlConnection(conStr))
             {
                 conn.Open();
-                var sql = "SELECT id, first_name, last_name, email, username, password FROM BACKEND.dbo.users WHERE username = @username";
+                var sql = "SELECT id, profile, first_name, last_name, email, employee,position,department,phone,hire_date,status, password FROM BACKEND.dbo.users WHERE email = @email";
                 using (SqlCommand cd = new SqlCommand(sql, conn))
                 {
-                    cd.Parameters.AddWithValue("@username", request.username);
+                    cd.Parameters.AddWithValue("@email", request.email);
                     using (SqlDataReader reader = cd.ExecuteReader())
                     {
                         if (reader.Read())
@@ -46,10 +46,16 @@ public class LoginController : ControllerBase
                             var user = new UserEntity
                             {
                                 id = reader.GetInt32(reader.GetOrdinal("id")),
+                                profile = reader.GetString(reader.GetOrdinal("profile")),
                                 first_name = reader.GetString(reader.GetOrdinal("first_name")),
                                 last_name = reader.GetString(reader.GetOrdinal("last_name")),
                                 email = reader.GetString(reader.GetOrdinal("email")),
-                                username = reader.GetString(reader.GetOrdinal("username")),
+                                employee = reader.GetString(reader.GetOrdinal("employee")),
+                                position = reader.GetString(reader.GetOrdinal("position")),
+                                department = reader.GetString(reader.GetOrdinal("department")),
+                                phone = reader.GetString(reader.GetOrdinal("phone")),
+                                hire_date = reader.GetDateTime(reader.GetOrdinal("hire_date")),
+                                status = reader.GetString(reader.GetOrdinal("status")),
                                 password = reader.GetString(reader.GetOrdinal("password"))
                             };
 
@@ -57,13 +63,13 @@ public class LoginController : ControllerBase
                             if (helper.VerifyPassword(request.password, user.password))
                             {
                                 // Generate JWT token
-                                var token = GenerateJwtToken(user.id.ToString(), user.username);
+                                var token = GenerateJwtToken(user.id.ToString(), user.email);
                                 var response = new
                                 {
                                     firstName = user.first_name,
                                     lastName = user.last_name,
                                     email = user.email,
-                                    userName = user.username,
+                                    employee = user.employee,
                                     token = token
                                 };
                                 return Ok(response);
