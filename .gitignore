@@ -23,3 +23,9 @@ appsettings.Local.json
 *.pfx
 *.key
 *.secrets.json
+
+.env
+README.md
+Dockerfile*
+docker-compose*
+.dockerignore

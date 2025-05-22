@@ -7,7 +7,7 @@
         context: .
         dockerfile: Dockerfile
       ports:
-        - "5000:80"  # Map local port 5000 to container port 80
+        - "5258:80"  # Map local port 5000 to container port 80
       environment:
         - ASPNETCORE_ENVIRONMENT=Development
         - ConnectionStrings__Default=Server=localhost,1433;Database=BACKEND;User Id=sa;Password=reallyStrongPwd123;TrustServerCertificate=True;
