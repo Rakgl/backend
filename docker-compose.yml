@@ -1,35 +1,33 @@
-version: '3.8'
 
-services:
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "5000:80"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__DefaultConnection=Server=localhost,1433;Database=BACKEND;User Id=sa;Password=reallyStrongPwd123;TrustServerCertificate=True
-    depends_on:
-      - db
-    networks:
-      - app-network
-
-  db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=reallyStrongPwd123
-    ports:
-      - "1433:1433"
-    volumes:
-      - sql-data:/var/opt/mssql
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
-
-volumes:
-  sql-data:
+  version: '3.8'
+  
+  services:
+    backend:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      ports:
+        - "5000:80"  # Map local port 5000 to container port 80
+      environment:
+        - ASPNETCORE_ENVIRONMENT=Development
+        - ConnectionStrings__Default=Server=localhost,1433;Database=BACKEND;User Id=sa;Password=reallyStrongPwd123;TrustServerCertificate=True;
+        - Jwt__Issuer=BACKEND
+        - Jwt__Audience=BACKEND
+        - Jwt__Key=wECc8iL24rSMeHyI5QZRgJDMiOuEecdb2IHTiNjjmqg=
+      volumes:
+        - ./wwwroot/uploads:/app/wwwroot/uploads  # Persist uploads locally
+      depends_on:
+        - db
+    
+    db:
+      image: mcr.microsoft.com/mssql/server:2019-latest
+      environment:
+        - ACCEPT_EULA=Y
+        - MSSQL_SA_PASSWORD=reallyStrongPwd123
+      ports:
+        - "1433:1433"
+      volumes:
+        - mssql-data:/var/opt/mssql
+  
+  volumes:
+    mssql-data:

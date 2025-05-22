@@ -11,7 +11,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>
     {
-        policy.WithOrigins("*").AllowAnyMethod().AllowAnyHeader(); 
+        policy.WithOrigins("https://dashboard.s.aditidemo.asia", "http://localhost:3000").AllowAnyMethod().AllowAnyHeader().AllowCredentials(); 
     });
 });
 
@@ -72,14 +72,17 @@ var app = builder.Build();
 app.MapControllers();
 app.UseCors("CorsPolicy");
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+app.UseStaticFiles(); 
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapControllers();
+
 app.Run();
