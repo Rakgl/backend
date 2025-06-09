@@ -12,7 +12,7 @@ public class UserEntity
     public string first_name { set; get; }
     
     [Required(ErrorMessage = "Profile is required")]
-    [StringLength(255,ErrorMessage = "Invalid Profile format")]
+    [StringLength(500,ErrorMessage = "Invalid Profile format")]
     public string profile { get; set; } = string.Empty;
     
     

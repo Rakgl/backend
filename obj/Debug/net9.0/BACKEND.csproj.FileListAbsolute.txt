@@ -180,3 +180,4 @@
 /Users/rak/Documents/rak.github.io/API-BACKEND/BACKEND/bin/Debug/net9.0/Microsoft.Extensions.Identity.Core.dll
 /Users/rak/Documents/rak.github.io/API-BACKEND/BACKEND/bin/Debug/net9.0/Microsoft.Extensions.Identity.Stores.dll
 /Users/rak/Documents/rak.github.io/API-BACKEND/BACKEND/bin/Debug/net9.0/dokploy.json
+/Users/rak/Documents/rak.github.io/API-BACKEND/BACKEND/bin/Debug/net9.0/BACKEND.staticwebassets.runtime.json

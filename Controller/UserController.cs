@@ -41,7 +41,7 @@ public class UserController : ControllerBase
                     cd.Parameters.AddWithValue("@department", request.department);
                     cd.Parameters.AddWithValue("@phone", request.phone);
                     cd.Parameters.AddWithValue("@hire_date", request.hire_date);
-                    cd.Parameters.AddWithValue("@status", request.status);
+                    cd.Parameters.AddWithValue("@status", request.status );
                     
                     var helper = new GeneralHelper();
                     var hashedPassword = helper.HashPassword(request.password);
@@ -74,7 +74,7 @@ public class UserController : ControllerBase
             using (SqlConnection conn = new SqlConnection(conStr))
             {
                 conn.Open();
-                var sql = "SELECT id,profile, first_name, last_name, email, employee, position, department, phone, hire_date, status FROM BACKEND.dbo.users";
+                var sql = "SELECT * FROM BACKEND.dbo.users";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     using (SqlDataReader reader = cmd.ExecuteReader())

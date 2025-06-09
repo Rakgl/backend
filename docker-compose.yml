@@ -1,33 +1,48 @@
+# /path/to/your/backend-app/docker-compose.yml
+version: '3.8'
 
-  version: '3.8'
-  
-  services:
-    backend:
-      build:
-        context: .
-        dockerfile: Dockerfile
-      ports:
-        - "5258:80"  # Map local port 5000 to container port 80
-      environment:
-        - ASPNETCORE_ENVIRONMENT=Development
-        - ConnectionStrings__Default=Server=localhost,1433;Database=BACKEND;User Id=sa;Password=reallyStrongPwd123;TrustServerCertificate=True;
-        - Jwt__Issuer=BACKEND
-        - Jwt__Audience=BACKEND
-        - Jwt__Key=wECc8iL24rSMeHyI5QZRgJDMiOuEecdb2IHTiNjjmqg=
-      volumes:
-        - ./wwwroot/uploads:/app/wwwroot/uploads  # Persist uploads locally
-      depends_on:
-        - db
-    
-    db:
-      image: mcr.microsoft.com/mssql/server:2019-latest
-      environment:
-        - ACCEPT_EULA=Y
-        - MSSQL_SA_PASSWORD=reallyStrongPwd123
-      ports:
-        - "1433:1433"
-      volumes:
-        - mssql-data:/var/opt/mssql
-  
-  volumes:
-    mssql-data:
+services:
+  backend:
+    build:
+      context: ./BACKEND
+      dockerfile: Dockerfile
+    # No need to expose ports directly on the host if using Traefik for external access
+    # ports:
+    #   - "5258:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Default=Server=db,1433;Database=BACKEND;User Id=sa;Password=reallyStrongPwd123;TrustServerCertificate=True;
+      - Jwt__Issuer=BACKEND
+      - Jwt__Audience=BACKEND
+      - Jwt__Key=wECc8iL24rSMeHyI5QZRgJDMiOuEecdb2IHTiNjjmqg=
+    volumes:
+      - ./BACKEND/wwwroot/uploads:/app/wwwroot/uploads
+    depends_on:
+      - db
+    networks: # Add this
+      - dokploy-network
+    labels: # Add Traefik labels
+      - traefik.enable=true
+      - traefik.http.routers.backend.rule=Host(`api.s.aditidemo.asia`) # Choose your backend domain
+      - traefik.http.routers.backend.entrypoints=websecure
+      - traefik.http.routers.backend.tls.certresolver=letsencrypt
+      - traefik.http.services.backend.loadbalancer.server.port=80 # Your backend listens on port 80 inside the container
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=reallyStrongPwd123
+    ports:
+      - "1433:1433" # Keep this if you need to access DB from outside for management
+    volumes:
+      - mssql-data:/var/opt/mssql
+    networks: # Add this if you want db to be part of the Dokploy network (optional, but good practice)
+      - dokploy-network
+
+networks: # Define the external network
+  dokploy-network:
+    external: true
+
+volumes:
+  mssql-data:
